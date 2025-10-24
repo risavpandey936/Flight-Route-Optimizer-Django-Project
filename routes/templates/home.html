@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flight Route Optimizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+    <div class="container">
+        <h1 class="mb-4">Flight Route Optimizer</h1>
+        <form id="routeForm" class="mb-3">
+            <div class="mb-3">
+                <label for="source" class="form-label">Source Airport Code</label>
+                <input type="text" class="form-control" id="source" placeholder="del">
+            </div>
+            <div class="mb-3">
+                <label for="destination" class="form-label">Destination Airport Code</label>
+                <input type="text" class="form-control" id="destination" placeholder="mum">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="getShortestPath()">Find Shortest Path</button>
+        </form>
+        <div id="result" class="alert alert-info"></div>
+    </div>
+
+    <script>
+      function getShortestPath(){
+          const source = document.getElementById('source').value.trim();
+          const destination = document.getElementById('destination').value.trim();
+          const resultDiv = document.getElementById('result');
+
+          if(!source || !destination){
+              resultDiv.textContent = "Please enter both source and destination.";
+              return;
+          }
+
+          fetch(`/api/shortest-path/?source=${source}&destination=${destination}`)
+            .then(response => response.json())
+            .then(data => {
+                if(data.shortest_distance){
+                    resultDiv.className = "alert alert-success";
+                    resultDiv.textContent = `Shortest Distance from ${source.toUpperCase()} to ${destination.toUpperCase()}: ${data.shortest_distance} km`;
+                } else if(data.error){
+                    resultDiv.className = "alert alert-danger";
+                    resultDiv.textContent = data.error;
+                } else {
+                    resultDiv.className = "alert alert-warning";
+                    resultDiv.textContent = data.message || 'No route found.';
+                }
+            }).catch(() => {
+                resultDiv.className = "alert alert-danger";
+                resultDiv.textContent = "Error fetching data.";
+            });
+      }
+    </script>
+</body>
+</html>
+
